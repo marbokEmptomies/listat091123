@@ -60,11 +60,11 @@ const App = () => {
   };
 
   const filteredLeftList = leftList.filter((name) =>
-    name.toLowerCase().includes(filterText.toLowerCase())
+    name.toLowerCase().startsWith(filterText.toLowerCase())
   );
 
   const filteredRightList = rightList.filter((name) =>
-    name.toLowerCase().includes(filterText.toLowerCase())
+    name.toLowerCase().startsWith(filterText.toLowerCase())
   );
 
   const handleInputChange = (e) => {
@@ -75,28 +75,28 @@ const App = () => {
 
     //Generate suggestions based on the input
     const filteredSuggestions = allItems.filter((name) =>
-      name.toLowerCase().includes(userInput.toLowerCase())
+      name.toLowerCase().startsWith(userInput.toLowerCase())
     );
-    setSuggestions(filteredSuggestions)
+    setSuggestions(filteredSuggestions);
   };
 
   return (
     <>
-    <div className="navbar">
-      <input
-        className="search-bar"
-        type="text"
-        placeholder="Search..."
-        value={filterText}
-        onChange={handleInputChange}
-        list="suggestions-list"
-      />
-      <datalist id="suggestions-list">
-        {suggestions.map((suggestion, index) => (
-          <option key={index} value={suggestion} />
-        ))}
-      </datalist>
-    </div>
+      <div className="navbar">
+        <input
+          className="search-bar"
+          type="text"
+          placeholder="Search..."
+          value={filterText}
+          onChange={handleInputChange}
+          list="suggestions-list"
+        />
+        <datalist id="suggestions-list">
+          {suggestions.map((suggestion, index) => (
+            <option key={index} value={suggestion} />
+          ))}
+        </datalist>
+      </div>
       <div className="container">
         <List
           title="Left List"

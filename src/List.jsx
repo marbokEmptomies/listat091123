@@ -1,22 +1,27 @@
+import { useState } from "react";
 import ListItem from "./ListItem";
 
 const List = ({ title, list, onSelect, selectedItems }) => {
-    const handleSelect = (item) => {
-        onSelect(item)
-    }
+  const handleSelect = (item) => {
+    onSelect(item);
+  };
   return (
     <div className="list-container">
       <h2>{title}</h2>
-      <ul>
-        {list.map((item) => (
-          <ListItem
-            key={item}
-            item={item}
-            onSelect={handleSelect}
-            isSelected={selectedItems.includes(item)}
-          />
-        ))}
-      </ul>
+      {list.length === 0 ? (
+        <p className="empty">The list has no items.</p>
+      ) : (
+        <ul>
+          {list.map((item) => (
+            <ListItem
+              key={item}
+              item={item}
+              onSelect={handleSelect}
+              isSelected={selectedItems.includes(item)}
+            />
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
