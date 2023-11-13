@@ -1,15 +1,23 @@
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 
 const ListItem = ({ item, onSelect, isSelected }) => {
-  const [isFocused, setIsFocused] = useState(false);
+  const listItemRef = useRef();
+
+  useEffect(() => {
+    if (isSelected) {
+      listItemRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, [isSelected]);
+
   return (
     <div>
       <li
-        className={`list-item ${isSelected ? 'selected' : ''} ${isFocused ? 'focused' : ''}`}
+        ref={listItemRef}
+        className={`list-item ${isSelected ? "selected" : ""}`}
         onClick={() => onSelect(item)}
-        onBlur={() => setIsFocused(false)}
-        onFocus={() => setIsFocused(true)}
-        tabIndex="0"
       >
         {item}
       </li>
