@@ -1,32 +1,13 @@
 import React, { useState } from "react";
 import List from "./List";
 import Arrow from "./Arrow";
+import { useAppReducer} from "./reducers/stateManagement";
+import { selectItem, transferItems, setFilterText, sortList } from "./reducers/actions";
 import "./App.css";
 
 const App = () => {
-  const [leftList, setLeftList] = useState([
-    "Starlet",
-    "Aatos",
-    "Torspo",
-    "Uhura",
-    "Princess Leia",
-    "Hindenburg",
-    "Kippari-Kalle",
-    "Batman",
-    "Captain Bloodloss",
-    "Klepto-Keijo",
-    "Kouhia",
-    "Tero-Petteri",
-    "Xavier",
-    "Geoff",
-    "Jaco",
-    "Stevie Winwood",
-    "PJ Harvey",
-    "Zappa",
-  ]);
-  const [rightList, setRightList] = useState([]);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [filterText, setFilterText] = useState("");
+  const [state, dispatch] = useAppReducer();
+  const { leftList, rightList, selectedItems, filterText } = state;
   const [suggestions, setSuggestions] = useState([]);
 
   const isLeftArrowDisabled =
@@ -37,27 +18,17 @@ const App = () => {
     !leftList.some((item) => selectedItems.includes(item));
 
   const handleSelect = (item) => {
-    if (selectedItems.includes(item)) {
-      setSelectedItems(
-        selectedItems.filter((selectedItem) => selectedItem !== item)
-      );
-    } else {
-      setSelectedItems([...selectedItems, item]);
-    }
+    dispatch(selectItem(item));
+    dispatch(setFilterText(""));
   };
 
   const handleTransfer = (direction) => {
-    if (selectedItems.length > 0) {
-      if (direction === "right" && !isRightArrowDisabled) {
-        setLeftList(leftList.filter((name) => !selectedItems.includes(name)));
-        setRightList([...rightList, ...selectedItems].sort());
-      } else if (direction === "left" && !isLeftArrowDisabled) {
-        setRightList(rightList.filter((name) => !selectedItems.includes(name)));
-        setLeftList([...leftList, ...selectedItems].sort());
-      }
-      setSelectedItems([]);
-    }
+    dispatch(transferItems(direction));
   };
+
+  const handleTitleClick = (listType, sortedList) => {
+    dispatch(sortList(listType, sortedList));
+  }
 
   const filteredLeftList = leftList.filter((name) =>
     name.toLowerCase().startsWith(filterText.toLowerCase())
@@ -69,7 +40,7 @@ const App = () => {
 
   const handleInputChange = (e) => {
     const userInput = e.target.value;
-    setFilterText(userInput);
+    dispatch(setFilterText(userInput));
 
     const allItems = [...leftList, ...rightList];
 
@@ -103,6 +74,7 @@ const App = () => {
           list={filteredLeftList}
           onSelect={handleSelect}
           selectedItems={selectedItems}
+          onTitleClick={(sortedList) => handleTitleClick("leftList", sortedList )}
         />
         <div className="arrow-container">
           <Arrow
@@ -121,6 +93,7 @@ const App = () => {
           list={filteredRightList}
           onSelect={handleSelect}
           selectedItems={selectedItems}
+          onTitleClick={(sortedList) => handleTitleClick("rightList", sortedList)}
         />
       </div>
     </>
