@@ -1,4 +1,3 @@
-import { useState } from "react";
 import ListItem from "./ListItem";
 
 const List = ({ title, list, onSelect, selectedItems }) => {
