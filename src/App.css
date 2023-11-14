@@ -75,6 +75,11 @@ button {
   cursor: pointer;
 }
 
+.add-button {
+  font-size: 11px;
+  cursor: pointer;
+}
+
 h2 {
   position: fixed;
   top: 55px;
