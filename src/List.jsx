@@ -21,9 +21,9 @@ const List = ({ title, list, onSelect, selectedItems, onTitleClick }) => {
         <p className="empty">The list has no items.</p>
       ) : (
         <ul>
-          {list.items.map((item) => (
+          {list.items.map((item, index) => (
             <ListItem
-              key={item}
+              key={index}
               item={item}
               onSelect={handleSelect}
               isSelected={selectedItems.includes(item)}

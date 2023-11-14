@@ -19,7 +19,7 @@ const ListItem = ({ item, onSelect, isSelected }) => {
         className={`list-item ${isSelected ? "selected" : ""}`}
         onClick={() => onSelect(item)}
       >
-        {item}
+        {item} 
       </li>
     </div>
   );
