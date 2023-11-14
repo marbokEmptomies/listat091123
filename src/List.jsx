@@ -11,6 +11,7 @@ const List = ({ title, list, onSelect, selectedItems, onTitleClick }) => {
     // Switch between ascending and descending sorting 
     const sortOrder = list.sortOrder === 'asc' ? 'desc' : 'asc';
     onTitleClick({ items: sortOrder === 'asc' ? sortedList : sortedList.reverse(), sortOrder });
+    console.log("Sort order: ", sortOrder)
   };
   
   return (

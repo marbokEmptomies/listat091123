@@ -7,12 +7,15 @@ import {
   transferItems,
   setFilterText,
   sortList,
+  setNewItem,
+  addNewItem,
+  deleteSelectedItems,
 } from "./reducers/actions";
 import "./App.css";
 
 const App = () => {
   const [state, dispatch] = useAppReducer();
-  const { leftList, rightList, selectedItems, filterText } = state;
+  const { leftList, rightList, selectedItems, filterText, newItem } = state;
   const [suggestions, setSuggestions] = useState([]);
 
   const isLeftArrowDisabled =
@@ -37,12 +40,9 @@ const App = () => {
   };
 
   const handleTitleClick = (listType, sortedList) => {
-    console.log("handleTitleClick:", listType)
+    console.log("handleTitleClick:", listType);
     dispatch(sortList(listType, sortedList));
   };
-
-  console.log("LEFTLIST: ", leftList.items);
-  console.log("RIGHTLIST: ", rightList.items);
 
   const filteredLeftList = leftList.items.filter((name) =>
     name.toLowerCase().startsWith(filterText.toLowerCase())
@@ -65,6 +65,20 @@ const App = () => {
     setSuggestions(filteredSuggestions);
   };
 
+  const handleAddNewItem = () => {
+    if (newItem !== "") {
+      dispatch(addNewItem(newItem));
+    }
+  };
+
+  const isDeleteButtonEnabled = selectedItems.length > 0;
+  console.log("SELECTED: ", selectedItems)
+
+  const handleDelete = () => {
+    console.log("SELECTED TO DELETE: ", selectedItems);
+    dispatch(deleteSelectedItems({ selectedItems }));
+  };
+
   return (
     <>
       <div className="navbar">
@@ -85,7 +99,7 @@ const App = () => {
       <div className="container">
         <List
           title="Left list"
-          list={{items: filteredLeftList, sortOrder: leftList.sortOrder}}
+          list={{ items: filteredLeftList, sortOrder: leftList.sortOrder }}
           onSelect={handleSelect}
           selectedItems={selectedItems}
           onTitleClick={(sortedList) =>
@@ -93,6 +107,22 @@ const App = () => {
           }
         />
         <div className="arrow-container">
+          <input
+            type="text"
+            placeholder="Enter a new name..."
+            value={newItem}
+            onChange={(e) => dispatch(setNewItem(e.target.value))}
+          />
+          <button className="add-button" onClick={handleAddNewItem}>
+            Add
+          </button>
+          <button
+            className="add-button"
+            onClick={handleDelete}
+            disabled={!isDeleteButtonEnabled}
+          >
+            Delete
+          </button>
           <Arrow
             direction="right"
             onClick={() => handleTransfer("right")}
@@ -106,7 +136,7 @@ const App = () => {
         </div>
         <List
           title="Right list"
-          list={{items: filteredRightList, sortOrder: rightList.sortOrder}}
+          list={{ items: filteredRightList, sortOrder: rightList.sortOrder }}
           onSelect={handleSelect}
           selectedItems={selectedItems}
           onTitleClick={(sortedList) =>
