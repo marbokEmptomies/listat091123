@@ -1,32 +1,35 @@
 import { useReducer } from "react";
 
 export const initialState = {
-  leftList: [
-    "Starlet",
-    "Aatos",
-    "Torspo",
-    "Uhura",
-    "Princess Leia",
-    "Hindenburg",
-    "Kippari-Kalle",
-    "Batman",
-    "Captain Bloodloss",
-    "Klepto-Keijo",
-    "Kouhia",
-    "Tero-Petteri",
-    "Xavier",
-    "Geoff",
-    "Jaco",
-    "Stevie Winwood",
-    "PJ Harvey",
-    "Zappa",
-  ],
-  rightList: [],
+  leftList: {
+    items: [
+      "Starlet",
+      "Aatos",
+      "Torspo",
+      "Uhura",
+      "Princess Leia",
+      "Hindenburg",
+      "Kippari-Kalle",
+      "Batman",
+      "Captain Bloodloss",
+      "Klepto-Keijo",
+      "Kouhia",
+      "Tero-Petteri",
+      "Xavier",
+      "Geoff",
+      "Jaco",
+      "Stevie Winwood",
+      "PJ Harvey",
+      "Zappa",
+    ],
+    sortOrder: "desc",
+  },
+  rightList: { items: [], sortOrder: "desc" },
   selectedItems: [],
   filterText: "",
 };
 
-//Reducer constants
+// Reducer constants
 export const SELECT_ITEM = "SELECT_ITEM";
 export const TRANSFER_ITEMS = "TRANSFER_ITEMS";
 export const SET_FILTER_TEXT = "SET_FILTER_TEXT";
@@ -41,23 +44,29 @@ export const reducer = (state, action) => {
       return {
         ...state,
         selectedItems: isSelected
-          ? state.selectedItems.filter((selectedItem) => selectedItem !== item)
+          ? state.selectedItems.filter(
+              (selectedItem) => selectedItem !== item
+            )
           : [...state.selectedItems, item],
       };
     case TRANSFER_ITEMS:
       const { direction } = action.payload;
       const sourceList = direction === "right" ? "leftList" : "rightList";
-      const destinationList = direction === "right" ? "rightList" : "leftList";
+      const destinationList =
+        direction === "right" ? "rightList" : "leftList";
 
       return {
         ...state,
-        [sourceList]: state[sourceList].filter(
-          (name) => !state.selectedItems.includes(name)
-        ),
-        [destinationList]: [
+        [sourceList]: {
+          ...state[sourceList],
+          items: state[sourceList].items.filter(
+            (name) => !state.selectedItems.includes(name)
+          ),
+        },
+        [destinationList]: {
           ...state[destinationList],
-          ...state.selectedItems,
-        ],
+          items: [...state[destinationList].items, ...state.selectedItems],
+        },
         selectedItems: [],
       };
 
@@ -72,7 +81,7 @@ export const reducer = (state, action) => {
 
       return {
         ...state,
-        [listType]: sortedList,
+        [listType]: { ...state[listType], items: sortedList.items, sortOrder: sortedList.sortOrder },
       };
 
     default:
@@ -82,3 +91,4 @@ export const reducer = (state, action) => {
 };
 
 export const useAppReducer = () => useReducer(reducer, initialState);
+

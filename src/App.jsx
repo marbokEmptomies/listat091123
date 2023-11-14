@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import List from "./List";
 import Arrow from "./Arrow";
-import { useAppReducer} from "./reducers/stateManagement";
-import { selectItem, transferItems, setFilterText, sortList } from "./reducers/actions";
+import { useAppReducer } from "./reducers/stateManagement";
+import {
+  selectItem,
+  transferItems,
+  setFilterText,
+  sortList,
+} from "./reducers/actions";
 import "./App.css";
 
 const App = () => {
@@ -12,10 +17,15 @@ const App = () => {
 
   const isLeftArrowDisabled =
     selectedItems.length === 0 ||
-    !rightList.some((item) => selectedItems.includes(item));
+    (!rightList || !rightList.items
+      ? false
+      : !rightList.items.some((item) => selectedItems.includes(item)));
+
   const isRightArrowDisabled =
     selectedItems.length === 0 ||
-    !leftList.some((item) => selectedItems.includes(item));
+    (!leftList || !leftList.items
+      ? false
+      : !leftList.items.some((item) => selectedItems.includes(item)));
 
   const handleSelect = (item) => {
     dispatch(selectItem(item));
@@ -27,14 +37,18 @@ const App = () => {
   };
 
   const handleTitleClick = (listType, sortedList) => {
+    console.log("handleTitleClick:", listType)
     dispatch(sortList(listType, sortedList));
-  }
+  };
 
-  const filteredLeftList = leftList.filter((name) =>
+  console.log("LEFTLIST: ", leftList.items);
+  console.log("RIGHTLIST: ", rightList.items);
+
+  const filteredLeftList = leftList.items.filter((name) =>
     name.toLowerCase().startsWith(filterText.toLowerCase())
   );
 
-  const filteredRightList = rightList.filter((name) =>
+  const filteredRightList = rightList.items.filter((name) =>
     name.toLowerCase().startsWith(filterText.toLowerCase())
   );
 
@@ -42,7 +56,7 @@ const App = () => {
     const userInput = e.target.value;
     dispatch(setFilterText(userInput));
 
-    const allItems = [...leftList, ...rightList];
+    const allItems = [...leftList.items, ...rightList.items];
 
     //Generate suggestions based on the input
     const filteredSuggestions = allItems.filter((name) =>
@@ -70,11 +84,13 @@ const App = () => {
       </div>
       <div className="container">
         <List
-          title="Left List"
-          list={filteredLeftList}
+          title="Left list"
+          list={{items: filteredLeftList, sortOrder: leftList.sortOrder}}
           onSelect={handleSelect}
           selectedItems={selectedItems}
-          onTitleClick={(sortedList) => handleTitleClick("leftList", sortedList )}
+          onTitleClick={(sortedList) =>
+            handleTitleClick("leftList", sortedList)
+          }
         />
         <div className="arrow-container">
           <Arrow
@@ -89,11 +105,13 @@ const App = () => {
           />
         </div>
         <List
-          title="Right List"
-          list={filteredRightList}
+          title="Right list"
+          list={{items: filteredRightList, sortOrder: rightList.sortOrder}}
           onSelect={handleSelect}
           selectedItems={selectedItems}
-          onTitleClick={(sortedList) => handleTitleClick("rightList", sortedList)}
+          onTitleClick={(sortedList) =>
+            handleTitleClick("rightList", sortedList)
+          }
         />
       </div>
     </>

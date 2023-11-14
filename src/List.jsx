@@ -6,18 +6,21 @@ const List = ({ title, list, onSelect, selectedItems, onTitleClick }) => {
   };
 
   const sortList = () => {
-    //Sort the list alphabetically
-    const sortedList = [...list].sort()
-    onTitleClick(sortedList)
-  }
+    // Sort the list alphabetically
+    const sortedList = [...list.items].sort((a, b) => a.localeCompare(b));
+    // Switch between ascending and descending sorting 
+    const sortOrder = list.sortOrder === 'asc' ? 'desc' : 'asc';
+    onTitleClick({ items: sortOrder === 'asc' ? sortedList : sortedList.reverse(), sortOrder });
+  };
+  
   return (
     <div className="list-container">
       <h2 onClick={sortList}>{title}</h2>
-      {list.length === 0 ? (
+      {list.items.length === 0 ? (
         <p className="empty">The list has no items.</p>
       ) : (
         <ul>
-          {list.map((item) => (
+          {list.items.map((item) => (
             <ListItem
               key={item}
               item={item}
