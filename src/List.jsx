@@ -24,6 +24,7 @@ const List = ({ title, list, onSelect, selectedItems, onTitleClick }) => {
           {list.items.map((item, index) => (
             <ListItem
               key={index}
+              index={index}
               item={item}
               onSelect={handleSelect}
               isSelected={selectedItems.includes(item)}
