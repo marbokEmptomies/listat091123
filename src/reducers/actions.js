@@ -1,4 +1,7 @@
 import {
+  LOAD_DATA,
+  SAVE_DATA,
+  DELETE_DATA,
   SELECT_ITEM,
   TRANSFER_ITEMS,
   SET_FILTER_TEXT,
@@ -8,6 +11,9 @@ import {
   DELETE_SELECTED_ITEMS,
 } from "./stateManagement";
 
+export const loadData = () => ({ type: LOAD_DATA });
+export const saveData = () => ({ type: SAVE_DATA });
+export const deleteData = (selectedItemsToDelete) => ({ type: DELETE_DATA, payload: {selectedItemsToDelete} });
 export const selectItem = (item) => ({ type: SELECT_ITEM, payload: { item } });
 export const transferItems = (direction) => ({
   type: TRANSFER_ITEMS,
@@ -30,6 +36,6 @@ export const addNewItem = (newItem) => ({
   payload: { newItem },
 });
 export const deleteSelectedItems = (payload) => ({
-    type: DELETE_SELECTED_ITEMS,
-    payload,
-  });
+  type: DELETE_SELECTED_ITEMS,
+  payload,
+});

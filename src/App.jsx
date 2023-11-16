@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import List from "./List";
 import Arrow from "./Arrow";
 import { useAppReducer } from "./reducers/stateManagement";
 import {
+  loadData,
+  saveData,
+  deleteData,
   selectItem,
   transferItems,
   setFilterText,
@@ -17,6 +20,10 @@ const App = () => {
   const [state, dispatch] = useAppReducer();
   const { leftList, rightList, selectedItems, filterText, newItem } = state;
   const [suggestions, setSuggestions] = useState([]);
+
+  useEffect(() => {
+    dispatch(loadData());
+  }, [])
 
   const isLeftArrowDisabled =
     selectedItems.length === 0 ||
@@ -37,6 +44,7 @@ const App = () => {
 
   const handleTransfer = (direction) => {
     dispatch(transferItems(direction));
+    dispatch(saveData());
   };
 
   const handleTitleClick = (listType, sortedList) => {
@@ -68,15 +76,17 @@ const App = () => {
   const handleAddNewItem = () => {
     if (newItem !== "") {
       dispatch(addNewItem(newItem));
+      dispatch(saveData())
     }
   };
 
   const isDeleteButtonEnabled = selectedItems.length > 0;
-  console.log("SELECTED: ", selectedItems)
+  console.log("SELECTED: ", selectedItems);
 
   const handleDelete = () => {
     console.log("SELECTED TO DELETE: ", selectedItems);
     dispatch(deleteSelectedItems({ selectedItems }));
+    dispatch(deleteData(selectedItems))
   };
 
   return (
