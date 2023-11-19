@@ -81,7 +81,6 @@ const App = () => {
   };
 
   const isDeleteButtonEnabled = selectedItems.length > 0;
-  console.log("SELECTED: ", selectedItems);
 
   const handleDelete = () => {
     console.log("SELECTED TO DELETE: ", selectedItems);
