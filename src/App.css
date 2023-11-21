@@ -15,7 +15,7 @@ body, html {
 .navbar {
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: space-around;
   background-color: #8f8f8f;
   padding: 10px;
 }
