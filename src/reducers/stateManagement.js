@@ -1,163 +1,170 @@
-import initialData from "../../data.json"; //Initial data from separate file
-import { useReducer } from "react";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import initialData from "../../data.json";
 
-// Initial state:
-export const initialState = {...initialData};
+export const loadData = createAsyncThunk("app/loadData", async () => {
+  try {
+    const loadedData =
+      JSON.parse(localStorage.getItem("appData")) || initialData;
+    console.log("Loaded data:", loadedData);
+    return loadedData;
+  } catch (error) {
+    console.error("Error loading data:", error);
+    throw error;
+  }
+});
 
-// Reducer constants
-export const LOAD_DATA = "LOAD_DATA";
-export const SAVE_DATA = "SAVE_DATA";
-export const DELETE_DATA = "DELETE_DATA";
-export const SELECT_ITEM = "SELECT_ITEM";
-export const TRANSFER_ITEMS = "TRANSFER_ITEMS";
-export const SET_FILTER_TEXT = "SET_FILTER_TEXT";
-export const SORT_LIST = "SORT_LIST";
-export const SET_NEW_ITEM = "SET_NEW_ITEM";
-export const ADD_NEW_ITEM = "ADD_NEW_ITEM";
-export const DELETE_SELECTED_ITEMS = "DELETE_SELECTED_ITEMS";
+// Async Thunk for saving data
+export const saveData = createAsyncThunk("app/saveData", async (state) => {
+  try {
+    const existingData = localStorage.getItem("appData");
 
-export const reducer = (state, action) => {
-  switch (action.type) {
-    case LOAD_DATA:
-      // Load data from localStorage or use the initial data if not found
-      const loadedData =
-        JSON.parse(localStorage.getItem("appData")) || initialData;
-
-      return { ...state, ...loadedData };
-    case SAVE_DATA:
-      // Save data to localStorage
+    if (!existingData || existingData !== JSON.stringify(state)) {
       localStorage.setItem("appData", JSON.stringify(state));
+      console.log("DATA SAVED: ", state);
+    }
 
-      return state;
-    case DELETE_DATA:
-      const { selectedItemsToDelete } = action.payload;
+    return state;
+  } catch (error) {
+    console.error("Error saving data:", error);
+    throw error;
+  }
+});
 
-      const updatedLeftListAfterDelete = {
-        items: state.leftList.items.filter(
-          (item) => !selectedItemsToDelete.includes(item)
-        ),
-        sortOrder: state.leftList.sortOrder,
-      };
+export const resetLists = createAsyncThunk("app/resetLists", async () => {
+  try {
+    const initialDataCopy = { ...initialData };
+    localStorage.setItem("appData", JSON.stringify(initialDataCopy));
+    return initialDataCopy;
+  } catch (error) {
+    console.error("Error resetting lists:", error);
+    throw error;
+  }
+});
 
-      const updatedRightListAfterDelete = {
-        items: state.rightList.items.filter(
-          (item) => !selectedItemsToDelete.includes(item)
-        ),
-        sortOrder: state.rightList.sortOrder,
-      };
-
-      const newStateAfterDelete = {
-        ...state,
-        leftList: updatedLeftListAfterDelete,
-        rightList: updatedRightListAfterDelete,
-        selectedItems: [],
-        isDeleteButtonEnabled: false,
-      };
-
-      localStorage.setItem(
-        "appData",
-        JSON.stringify({
-          leftList: newStateAfterDelete.leftList,
-          rightList: newStateAfterDelete.rightList,
-        })
-      );
-      return newStateAfterDelete;
-    case SELECT_ITEM:
+const appSlice = createSlice({
+  name: "app",
+  initialState: { ...initialData },
+  reducers: {
+    selectItem: (state, action) => {
       const { item } = action.payload;
       const isSelected = state.selectedItems.includes(item);
 
-      return {
-        ...state,
-        selectedItems: isSelected
-          ? state.selectedItems.filter((selectedItem) => selectedItem !== item)
-          : [...state.selectedItems, item],
-      };
-    case TRANSFER_ITEMS:
+      const isOppositeList =
+        (state.leftList.items.includes(item) &&
+          state.selectedItems.some((selectedItem) =>
+            state.rightList.items.includes(selectedItem)
+          )) ||
+        (state.rightList.items.includes(item) &&
+          state.selectedItems.some((selectedItem) =>
+            state.leftList.items.includes(selectedItem)
+          ));
+
+      state.selectedItems = isOppositeList
+        ? [item] // Clear selectedItems if the new item is from the opposite list
+        : isSelected
+        ? state.selectedItems.filter((selectedItem) => selectedItem !== item)
+        : [...state.selectedItems, item];
+    },
+    transferItems: (state, action) => {
       const { direction } = action.payload;
-      const sourceList = direction === "right" ? "leftList" : "rightList";
-      const destinationList = direction === "right" ? "rightList" : "leftList";
+      const sourceListName = direction === "right" ? "leftList" : "rightList";
+      const destinationListName =
+        direction === "right" ? "rightList" : "leftList";
+
+      const sourceList = state[sourceListName].items.filter(
+        (name) => !state.selectedItems.includes(name)
+      );
+      const destinationList = [
+        ...state[destinationListName].items,
+        ...state.selectedItems,
+      ];
 
       return {
         ...state,
-        [sourceList]: {
-          ...state[sourceList],
-          items: state[sourceList].items.filter(
-            (name) => !state.selectedItems.includes(name)
-          ),
-        },
-        [destinationList]: {
-          ...state[destinationList],
-          items: [...state[destinationList].items, ...state.selectedItems],
+        [sourceListName]: { ...state[sourceListName], items: sourceList },
+        [destinationListName]: {
+          ...state[destinationListName],
+          items: destinationList,
         },
         selectedItems: [],
       };
-
-    case SET_FILTER_TEXT:
-      return {
-        ...state,
-        filterText: action.payload,
-      };
-
-    case SORT_LIST:
+    },
+    setFilterText: (state, action) => {
+      state.filterText = action.payload;
+    },
+    sortList: (state, action) => {
       const { listType, sortedList } = action.payload;
-
-      return {
-        ...state,
-        [listType]: {
-          ...state[listType],
-          items: sortedList.items,
-          sortOrder: sortedList.sortOrder,
-        },
-      };
-
-    case SET_NEW_ITEM:
-      const { setItem } = action.payload;
-      return {
-        ...state,
-        newItem: setItem,
-      };
-
-    case ADD_NEW_ITEM:
-      const { newItem } = action.payload;
-
-      return {
-        ...state,
-        leftList: {
-          ...state.leftList,
-          items: [...state.leftList.items, newItem],
-        },
-        newItem: "",
-      };
-
-    case DELETE_SELECTED_ITEMS:
+      state[listType].items = sortedList.items;
+      state[listType].sortOrder = sortedList.sortOrder;
+    },
+    setNewItem: (state, action) => {
+      state.newItem = action.payload;
+    },
+    addNewItem: (state, action) => {
+      const { newItem, listType } = action.payload;
+    
+      // Check if the listType exists in state
+      if (!state[listType]) {
+        state[listType] = { items: [], sortOrder: "asc" };
+      }
+    
+      // Check if the new item already exists
+      const isExistingItem = state[listType].items.includes(newItem);
+    
+      // If the item exists, modify the name
+      if (isExistingItem) {
+        let index = 1;
+        let modifiedName = `${newItem}_${index}`;
+    
+        // Keep incrementing the index until a unique name is found
+        while (state[listType].items.includes(modifiedName)) {
+          index++;
+          modifiedName = `${newItem}_${index}`;
+        }
+    
+        // Add the modified name to the list
+        state[listType].items = [...state[listType].items, modifiedName];
+        state.newItem = modifiedName;
+      } else {
+        // If the item doesn't exist, add it directly
+        state[listType].items = [...state[listType].items, newItem];
+        state.newItem = newItem;
+      }
+      state.newItem = "";
+    },      
+    deleteSelectedItems: (state, action) => {
       const { selectedItems } = action.payload;
+      state.leftList.items = state.leftList.items.filter(
+        (item) => !selectedItems.includes(item)
+      );
+      state.selectedItems = [];
+      state.isDeleteButtonEnabled = false;
+    },
+    default: (state) => state,
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loadData.fulfilled, (state, action) => {
+        // Handle the data loaded from localStorage
+        return action.payload;
+      })
+      .addCase(saveData.fulfilled, (state, action) => {
+        // Handle the successful save
+      })
+      .addCase(resetLists.fulfilled, (state, action) => {
+        return action.payload;
+      });
+  },
+});
 
-      const updatedLeftList = {
-        items: state.leftList.items.filter(
-          (item) => !selectedItems.includes(item)
-        ),
-        sortOrder: state.leftList.sortOrder,
-      };
+export const {
+  selectItem,
+  transferItems,
+  setFilterText,
+  sortList,
+  setNewItem,
+  addNewItem,
+  deleteSelectedItems,
+} = appSlice.actions;
 
-      const updatedRightList = {
-        items: state.rightList.items.filter(
-          (item) => !selectedItems.includes(item)
-        ),
-        sortOrder: state.rightList.sortOrder,
-      };
-
-      return {
-        ...state,
-        leftList: updatedLeftList,
-        rightList: updatedRightList,
-        selectedItems: [],
-        isDeleteButtonEnabled: false,
-      };
-
-    default:
-      console.log("No such action: ", action);
-      return state;
-  }
-};
-
-export const useAppReducer = () => useReducer(reducer, initialState);
+export const appReducer = appSlice.reducer;

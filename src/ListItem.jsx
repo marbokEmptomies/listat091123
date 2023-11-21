@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-const ListItem = ({ index, item, onSelect, isSelected }) => {
+const ListItem = ({ item, onSelect, isSelected }) => {
   const listItemRef = useRef();
 
   useEffect(() => {

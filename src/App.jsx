@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import List from "./List";
 import Arrow from "./Arrow";
-import { useAppReducer } from "./reducers/stateManagement";
+import { useDispatch, useSelector } from "react-redux";
 import {
   loadData,
   saveData,
-  deleteData,
   selectItem,
   transferItems,
   setFilterText,
@@ -13,17 +12,25 @@ import {
   setNewItem,
   addNewItem,
   deleteSelectedItems,
-} from "./reducers/actions";
+  resetLists,
+} from "./reducers/stateManagement";
 import "./App.css";
 
 const App = () => {
-  const [state, dispatch] = useAppReducer();
-  const { leftList, rightList, selectedItems, filterText, newItem } = state;
+  const dispatch = useDispatch();
+  const state = useSelector((state) => state.app);
   const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
     dispatch(loadData());
-  }, [])
+  }, [dispatch]);
+
+  useEffect(() => {
+    // Save data to localStorage whenever the state changes
+    dispatch(saveData(state));
+  }, [dispatch, state]);
+
+  const { leftList, rightList, selectedItems, filterText, newItem } = state;
 
   const isLeftArrowDisabled =
     selectedItems.length === 0 ||
@@ -38,18 +45,16 @@ const App = () => {
       : !leftList.items.some((item) => selectedItems.includes(item)));
 
   const handleSelect = (item) => {
-    dispatch(selectItem(item));
+    dispatch(selectItem({ item }));
     dispatch(setFilterText(""));
   };
 
   const handleTransfer = (direction) => {
-    dispatch(transferItems(direction));
-    dispatch(saveData());
+    dispatch(transferItems({ direction }));
   };
 
   const handleTitleClick = (listType, sortedList) => {
-    console.log("handleTitleClick:", listType);
-    dispatch(sortList(listType, sortedList));
+    dispatch(sortList({ listType, sortedList }));
   };
 
   const filteredLeftList = leftList.items.filter((name) =>
@@ -66,31 +71,34 @@ const App = () => {
 
     const allItems = [...leftList.items, ...rightList.items];
 
-    //Generate suggestions based on the input
+    // Generate suggestions based on the input
     const filteredSuggestions = allItems.filter((name) =>
       name.toLowerCase().startsWith(userInput.toLowerCase())
     );
     setSuggestions(filteredSuggestions);
   };
 
-  const handleAddNewItem = () => {
+  const handleAddNewItem = (listType) => {
     if (newItem !== "") {
-      dispatch(addNewItem(newItem));
-      dispatch(saveData())
+      dispatch(addNewItem({newItem, listType}));
     }
   };
 
   const isDeleteButtonEnabled = selectedItems.length > 0;
 
   const handleDelete = () => {
-    console.log("SELECTED TO DELETE: ", selectedItems);
     dispatch(deleteSelectedItems({ selectedItems }));
-    dispatch(deleteData(selectedItems))
+    dispatch(saveData(state));
   };
+
+  const resetListsHandler = () => {
+    dispatch(resetLists());
+  }
 
   return (
     <>
       <div className="navbar">
+        <button className="add-button" onClick={resetListsHandler}>Reset lists</button>
         <input
           className="search-bar"
           type="text"
@@ -122,9 +130,20 @@ const App = () => {
             value={newItem}
             onChange={(e) => dispatch(setNewItem(e.target.value))}
           />
-          <button className="add-button" onClick={handleAddNewItem}>
-            Add
-          </button>
+          <div>
+            <button
+              className="add-button"
+              onClick={() => handleAddNewItem("leftList")}
+            >
+              ←
+            </button>
+            <button
+              className="add-button"
+              onClick={() => handleAddNewItem("rightList")}
+            >
+              →
+            </button>
+          </div>
           <button
             className="add-button"
             onClick={handleDelete}
