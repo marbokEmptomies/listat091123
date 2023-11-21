@@ -109,7 +109,7 @@ const appSlice = createSlice({
       }
     
       // Check if the new item already exists
-      const isExistingItem = state[listType].items.includes(newItem);
+      const isExistingItem = state.leftList.items.includes(newItem) || state.rightList.items.includes(newItem);
     
       // If the item exists, modify the name
       if (isExistingItem) {
