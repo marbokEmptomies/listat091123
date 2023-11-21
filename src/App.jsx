@@ -124,6 +124,7 @@ const App = () => {
           }
         />
         <div className="arrow-container">
+          <p>Add a new name</p>
           <input
             type="text"
             placeholder="Enter a new name..."
@@ -151,6 +152,7 @@ const App = () => {
           >
             Delete
           </button>
+          <p>Transfer (selected) names</p>
           <Arrow
             direction="right"
             onClick={() => handleTransfer("right")}
