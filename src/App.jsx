@@ -44,6 +44,16 @@ const App = () => {
       ? false
       : !leftList.items.some((item) => selectedItems.includes(item)));
 
+  const handleResetConfirmation = () => {
+    const userConfirmed = window.confirm(
+      "Are you sure you want to reset the lists?"
+    );
+
+    if (userConfirmed) {
+      dispatch(resetLists());
+    }
+  };
+
   const handleSelect = (item) => {
     dispatch(selectItem({ item }));
     dispatch(setFilterText(""));
@@ -80,7 +90,7 @@ const App = () => {
 
   const handleAddNewItem = (listType) => {
     if (newItem !== "") {
-      dispatch(addNewItem({newItem, listType}));
+      dispatch(addNewItem({ newItem, listType }));
     }
   };
 
@@ -92,13 +102,15 @@ const App = () => {
   };
 
   const resetListsHandler = () => {
-    dispatch(resetLists());
-  }
+    handleResetConfirmation();
+  };
 
   return (
     <>
       <div className="navbar">
-        <button className="add-button" onClick={resetListsHandler}>Reset lists</button>
+        <button className="add-button" onClick={resetListsHandler}>
+          Reset lists
+        </button>
         <input
           className="search-bar"
           type="text"
