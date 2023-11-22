@@ -70,7 +70,7 @@ const appSlice = createSlice({
       const sourceListName = direction === "right" ? "leftList" : "rightList";
       const destinationListName =
         direction === "right" ? "rightList" : "leftList";
-
+    
       const sourceList = state[sourceListName].items.filter(
         (name) => !state.selectedItems.includes(name)
       );
@@ -78,17 +78,12 @@ const appSlice = createSlice({
         ...state[destinationListName].items,
         ...state.selectedItems,
       ];
-
-      return {
-        ...state,
-        [sourceListName]: { ...state[sourceListName], items: sourceList },
-        [destinationListName]: {
-          ...state[destinationListName],
-          items: destinationList,
-        },
-        selectedItems: [],
-      };
+    
+      state[sourceListName].items = sourceList;
+      state[destinationListName].items = destinationList;
+      state.selectedItems = [];
     },
+    
     setFilterText: (state, action) => {
       state.filterText = action.payload;
     },
